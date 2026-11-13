@@ -6,6 +6,8 @@ for the [`dinky`](https://github.com/mikker/Dinky) tiling window manager: one se
 for the current layout/mode. It refreshes on a timer and immediately when Spaces
 change or applications launch/quit.
 
+![](https://github.com/monointerferenz/dinkyhud/blob/doc/doc/dinkyhud.png?raw=true)
+
 ## Requirements
 
 - macOS with [Hammerspoon](https://www.hammerspoon.org)
