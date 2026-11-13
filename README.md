@@ -1,5 +1,5 @@
 # DinkyHUD
-A Hammerspoon spoon HUD for the [dinky window manager from ](https://github.com/mikker/Dinky)
+A Hammerspoon spoon HUD for the [dinky window manager](https://github.com/mikker/Dinky)
 
 ![dinkyhud](https://raw.githubusercontent.com/monointerferenz/dinkyhud/refs/heads/doc/doc/dinkyhub.png)
 
