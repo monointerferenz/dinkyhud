@@ -23,8 +23,8 @@ obj.__index = obj
 -- Metadata
 obj.name    = "dinkyhud"
 obj.version = "0.1"
-obj.author  = "fwa <mail@friedrich-pittelkow.de>"
-obj.license = "MIT - https://opensource.org/licenses/MIT"
+obj.author  = "monointerferenz <operator@monointerferenz.de>",
+obj.license = "CC0 1.0"
 
 --- dinkyhud.dinkyBin
 --- Variable
