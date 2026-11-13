@@ -1,0 +1,7 @@
+{
+  "name": "dinkyhud",
+  "version": "0.1",
+  "author": "fwa <mail@friedrich-pittelkow.de>",
+  "license": "MIT - https://opensource.org/licenses/MIT",
+  "description": "A compact floating HUD for the dinky tiling window manager"
+}

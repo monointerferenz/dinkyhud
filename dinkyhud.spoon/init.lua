@@ -1,38 +1,82 @@
 --- === dinkyhud ===
+---
+--- A compact floating HUD for the dinky tiling window manager
+---
+--- The HUD shows every workspace that has windows (plus the focused one),
+--- renders a sketchybar-app-font icon for each app running in it, and appends
+--- a badge for the current layout/mode. It refreshes on a timer and
+--- immediately when Spaces change or applications launch/quit.
+---
+--- Requirements:
+---  * `dinky` installed (default path `/opt/homebrew/bin/dinky`, override with `dinkyhud.dinkyBin`)
+---  * `sketchybar-app-font` installed for the app icons
+---
+--- Usage:
+---
+---     hs.loadSpoon("dinkyhud")
+---     spoon.dinkyhud.position = "top" -- optional, before start()
+---     spoon.dinkyhud:start()
 
-local DINKY_BIN = "/opt/homebrew/bin/dinky" -- Verify path with `which dinky`
-local APP_FONT  = "sketchybar-app-font"
+local obj = {}
+obj.__index = obj
 
--- Position: "top" (just below the menu bar) or "bottom" (above the Dock)
-local POSITION  = "bottom"
+-- Metadata
+obj.name    = "dinkyhud"
+obj.version = "0.1"
+obj.author  = "fwa <mail@friedrich-pittelkow.de>"
+obj.license = "MIT - https://opensource.org/licenses/MIT"
 
-local LAYOUT_LABELS = {
+--- dinkyhud.dinkyBin
+--- Variable
+--- Absolute path to the `dinky` executable
+obj.dinkyBin = "/opt/homebrew/bin/dinky"
+
+--- dinkyhud.appFont
+--- Variable
+--- Font used for the app icons (requires the sketchybar-app-font glyphs)
+obj.appFont = "sketchybar-app-font"
+
+--- dinkyhud.position
+--- Variable
+--- Vertical placement: "bottom" (above the Dock) or "top" (just below the menu bar)
+obj.position = "bottom"
+
+--- dinkyhud.refreshInterval
+--- Variable
+--- Seconds between automatic refreshes
+obj.refreshInterval = 2
+
+--- dinkyhud.iconMapPath
+--- Variable
+--- Path to the sketchybar app icon map; defaults to the `icon_map.sh` bundled with this Spoon
+obj.iconMapPath = nil
+
+--- dinkyhud.layoutLabels
+--- Variable
+--- Short label shown for each layout (keys: `dwindle`, `master`, `scrolling`)
+obj.layoutLabels = {
     dwindle   = "   dwi",
     master    = "   mst",
-    scrolling = "   scr"
+    scrolling = "   scr",
 }
 
-local MODE_COLORS = {
+--- dinkyhud.modeColors
+--- Variable
+--- Badge colours keyed by dinky mode name; `default` is used for unknown modes
+obj.modeColors = {
     main    = { red = 0.50, green = 0.62, blue = 0.75, alpha = 1.0 }, -- Soft sky blue
     service = { red = 0.78, green = 0.63, blue = 0.36, alpha = 1.0 }, -- Warm orange/amber
-    default = { red = 0.61, green = 0.51, blue = 0.61, alpha = 1.0 }  -- Lavender fallback for other modes
+    default = { red = 0.61, green = 0.51, blue = 0.61, alpha = 1.0 }, -- Lavender fallback
 }
 
-local function getLayoutBadgeColor(mode)
-    if not mode or mode == "" then
-        return MODE_COLORS.main
-    end
-    return MODE_COLORS[mode] or MODE_COLORS.default
-end
-
 -- Map exact macOS %{app-name} strings to sketchybar-app-font ligatures.
--- Any app not listed here automatically falls back to `:lowercase_name:` (or `:default:` if unknown).
-local VALID_LIGATURES = {}
+-- Any app not listed here automatically falls back to `:lowercase_name:`
+-- (or `:default:` if the font has no such glyph).
 
 local function loadSketchybarIconMap(path)
-    local map = {}
+    local map, valid = {}, {}
     local file = io.open(path, "r")
-    if not file then return map end
+    if not file then return map, valid end
 
     local pendingApps = {}
     for line in file:lines() do
@@ -44,7 +88,7 @@ local function loadSketchybarIconMap(path)
 
         local ligature = line:match('icon_result="(:[^"]+:)"')
         if ligature then
-            VALID_LIGATURES[ligature] = true -- Track every real glyph in the font
+            valid[ligature] = true -- Track every real glyph in the font
             for _, app in ipairs(pendingApps) do
                 map[app] = ligature
             end
@@ -53,43 +97,32 @@ local function loadSketchybarIconMap(path)
     end
 
     file:close()
-    return map
+    return map, valid
 end
 
-local APP_LIGATURES = loadSketchybarIconMap(hs.configdir .. "/icon_map.sh")
-
-
--- Global canvas reference & click target map
-if dinkyHud then dinkyHud:delete() end
-dinkyHud = hs.canvas.new({ x = 0, y = 0, w = 200, h = 32 })
-dinkyHud:level(hs.canvas.windowLevels.floating)
-dinkyHud:behavior(
-    hs.canvas.windowBehaviors.canJoinAllSpaces +
-    hs.canvas.windowBehaviors.stationary +
-    hs.canvas.windowBehaviors.ignoresCycle
-    )
-
-local clickZones = {}
-
-local function runDinky(args, callback)
-    local task = hs.task.new(DINKY_BIN, function(exitCode, stdOut)
-        if callback then
-            local cleanOut = (exitCode == 0 and stdOut) and stdOut:gsub("%s+$", "") or nil
-            callback(cleanOut)
-        end
-    end, args)
-    if task then task:start() end
+local function layoutBadgeColor(mode, colors)
+    if not mode or mode == "" then
+        return colors.main
+    end
+    return colors[mode] or colors.default
 end
 
-local function getAppLigature(app)
-    -- 1. Direct match from icon_map.sh
-    if APP_LIGATURES[app] then
-        return APP_LIGATURES[app]
+function obj:_loadIconMap()
+    local path = self.iconMapPath or hs.spoons.resourcePath("icon_map.sh")
+    self._appLigatures, self._validLigatures = loadSketchybarIconMap(path)
+end
+
+function obj:_appLigature(app)
+    -- 1. Direct match from the icon map
+    local map = self._appLigatures or {}
+    if map[app] then
+        return map[app]
     end
 
-    -- 2. Try normalized guess ONLY if that ligature actually exists in the font
+    -- 2. Try a normalized guess, but only if that ligature really exists in the font
+    local valid = self._validLigatures or {}
     local normalized = ":" .. app:lower():gsub("[^%w]+", "_"):gsub("^_+", ""):gsub("_+$", "") .. ":"
-    if VALID_LIGATURES[normalized] then
+    if valid[normalized] then
         return normalized
     end
 
@@ -97,13 +130,13 @@ local function getAppLigature(app)
     return ":default:"
 end
 
--- Build styled text for one Space segment and measure its exact pixel width
-local function makeSpaceStyledText(wsNum, icons, isFocused)
+-- Build styled text for one Space segment
+function obj:_spaceStyledText(wsNum, icons, isFocused)
     local numColor  = isFocused and { red = 0.91, green = 0.86, blue = 0.71, alpha = 1.0 } or { red = 0.83, green = 0.76, blue = 0.63, alpha = 0.7 }
     local iconColor = isFocused and { red = 0.91, green = 0.86, blue = 0.71, alpha = 0.95 } or { red = 0.83, green = 0.76, blue = 0.63, alpha = 0.55 }
 
     local numStyle  = { font = { name = ".AppleSystemUIFontBold", size = 12 }, color = numColor, baselineOffset = -1.5 }
-    local iconStyle = { font = { name = APP_FONT, size = 12 }, color = iconColor, baselineOffset = -3.0 }
+    local iconStyle = { font = { name = self.appFont, size = 12 }, color = iconColor, baselineOffset = -3.0 }
 
     local st = hs.styledtext.new(wsNum, numStyle)
     if icons and #icons > 0 then
@@ -112,25 +145,121 @@ local function makeSpaceStyledText(wsNum, icons, isFocused)
     return st
 end
 
-local function updateHud()
-    runDinky({
+function obj:_runDinky(args, callback)
+    local task = hs.task.new(self.dinkyBin, function(exitCode, stdOut)
+        if callback then
+            local cleanOut = (exitCode == 0 and stdOut) and stdOut:gsub("%s+$", "") or nil
+            callback(cleanOut)
+        end
+    end, args)
+    if task then task:start() end
+end
+
+--- dinkyhud:init()
+--- Method
+--- Create the HUD canvas
+---
+--- Called automatically by `hs.loadSpoon`. Calling it again replaces any
+--- canvas created by a previous call.
+---
+--- Returns:
+---  * The dinkyhud object
+function obj:init()
+    if self.canvas then self.canvas:delete() end
+    self.canvas = hs.canvas.new({ x = 0, y = 0, w = 200, h = 32 })
+    self.canvas:level(hs.canvas.windowLevels.floating)
+    self.canvas:behavior(
+        hs.canvas.windowBehaviors.canJoinAllSpaces +
+        hs.canvas.windowBehaviors.stationary +
+        hs.canvas.windowBehaviors.ignoresCycle
+    )
+    return self
+end
+
+--- dinkyhud:start()
+--- Method
+--- Start the HUD
+---
+--- Loads the icon map, performs an immediate refresh, starts the refresh
+--- timer and the Spaces/application watchers. A previous run is stopped
+--- first, so calling this twice is safe.
+---
+--- Returns:
+---  * The dinkyhud object
+function obj:start()
+    self:stop()
+    if not self.canvas then self:init() end
+    self:_loadIconMap()
+    self:update()
+
+    self.timer = hs.timer.doEvery(self.refreshInterval, function()
+        self:update()
+    end)
+
+    self.spaceWatcher = hs.spaces.watcher.new(function()
+        hs.timer.doAfter(0.15, function() self:update() end)
+    end):start()
+
+    self.appWatcher = hs.application.watcher.new(function(_, event)
+        if event == hs.application.watcher.launched or event == hs.application.watcher.terminated then
+            hs.timer.doAfter(0.2, function() self:update() end)
+        end
+    end):start()
+
+    return self
+end
+
+--- dinkyhud:stop()
+--- Method
+--- Stop the HUD
+---
+--- Stops the refresh timer and both watchers, and hides the canvas. The HUD
+--- can be started again with `start()`.
+---
+--- Returns:
+---  * The dinkyhud object
+function obj:stop()
+    if self.timer then self.timer:stop(); self.timer = nil end
+    if self.spaceWatcher then self.spaceWatcher:stop(); self.spaceWatcher = nil end
+    if self.appWatcher then self.appWatcher:stop(); self.appWatcher = nil end
+    if self.canvas then self.canvas:hide() end
+    return self
+end
+
+--- dinkyhud:update()
+--- Method
+--- Refresh the HUD immediately
+---
+--- Queries `dinky` for the current workspaces, windows and mode, then
+--- redraws the canvas. Refreshes happen automatically while the HUD is
+--- running; call this only when you want an on-demand redraw.
+---
+--- Returns:
+---  * The dinkyhud object
+function obj:update()
+    if not self.canvas then return self end
+    if not self._appLigatures then self:_loadIconMap() end
+
+    local canvas = self.canvas
+
+    self:_runDinky({
         "list-workspaces",
         "--all",
         "--format",
         "%{workspace}|%{workspace-is-focused}|%{workspace-layout}"
     }, function(wsOut)
         if not wsOut or wsOut == "" then
-            dinkyHud:hide()
+            canvas:hide()
             return
         end
 
-        runDinky({
+        self:_runDinky({
             "list-windows",
             "--all",
             "--format",
             "%{workspace}|%{app-name}"
         }, function(winOut)
-            runDinky({ "list-modes", "--current" }, function(modeOut)
+            self:_runDinky({ "list-modes", "--current" }, function(modeOut)
                 local currentMode = modeOut or "main"
                 local appsByWs, seenByWs = {}, {}
 
@@ -142,7 +271,7 @@ local function updateHud()
                             seenByWs[ws] = seenByWs[ws] or {}
                             if not seenByWs[ws][app] then
                                 seenByWs[ws][app] = true
-                                table.insert(appsByWs[ws], getAppLigature(app))
+                                table.insert(appsByWs[ws], self:_appLigature(app))
                             end
                         end
                     end
@@ -161,10 +290,9 @@ local function updateHud()
 
                         local icons = appsByWs[ws]
                         if (icons and #icons > 0) or focused then
-                            local st = makeSpaceStyledText(ws, icons, focused)
-                            local size = dinkyHud:minimumTextSize(st)
+                            local st = self:_spaceStyledText(ws, icons, focused)
+                            local size = canvas:minimumTextSize(st)
                             table.insert(segments, {
-                                ws = ws,
                                 focused = focused,
                                 text = st,
                                 width = math.ceil(size.w) + 16
@@ -174,12 +302,12 @@ local function updateHud()
                 end
 
                 -- Apply dynamic color based on `dinky list-modes --current`
-                local layoutColor = getLayoutBadgeColor(currentMode)
+                local layoutColor = layoutBadgeColor(currentMode, self.modeColors)
                 local layoutText = hs.styledtext.new(
-                    LAYOUT_LABELS[activeLayout] or activeLayout,
+                    self.layoutLabels[activeLayout] or activeLayout,
                     { font = { name = ".AppleSystemUIFont", size = 12 }, color = layoutColor }
                 )
-                local layoutWidth = math.ceil(dinkyHud:minimumTextSize(layoutText).w) + 18
+                local layoutWidth = math.ceil(canvas:minimumTextSize(layoutText).w) + 18
 
                 local outerPad = 6
                 local gap = 4
@@ -192,11 +320,11 @@ local function updateHud()
 
                 local screenFrame = hs.screen.primaryScreen():frame()
                 local x = math.floor(screenFrame.x + (screenFrame.w - totalWidth) / 2)
-                local y = (POSITION == "bottom")
+                local y = (self.position == "bottom")
                     and (screenFrame.y + screenFrame.h - height - 8)
                     or  (screenFrame.y + 6)
 
-                dinkyHud:frame({ x = x, y = y, w = totalWidth, h = height })
+                canvas:frame({ x = x, y = y, w = totalWidth, h = height })
 
                 local elements = {
                     {
@@ -217,7 +345,6 @@ local function updateHud()
                     }
                 }
 
-                clickZones = {}
                 local cursorX = outerPad
 
                 for _, seg in ipairs(segments) do
@@ -237,14 +364,6 @@ local function updateHud()
                         text = seg.text
                     })
 
-                    table.insert(clickZones, {
-                        x1 = cursorX,
-                        x2 = cursorX + seg.width,
-                        action = function()
-                            runDinky({ "workspace", seg.ws }, updateHud)
-                        end
-                    })
-
                     cursorX = cursorX + seg.width + gap
                 end
 
@@ -262,41 +381,13 @@ local function updateHud()
                     text = layoutText
                 })
 
-                table.insert(clickZones, {
-                    x1 = cursorX,
-                    x2 = totalWidth,
-                    action = function()
-                        runDinky({ "workspace-layout", "dwindle", "master", "scrolling" }, updateHud)
-                    end
-                })
-
-                dinkyHud:replaceElements(elements)
-                dinkyHud:show()
+                canvas:replaceElements(elements)
+                canvas:show()
             end)
         end)
     end)
+
+    return self
 end
 
--- Handle clicks on Space segments or the layout badge
--- dinkyHud:mouseCallback(function(_, event, _, x, _)
---     if event == "mouseUp" then
---         for _, zone in ipairs(clickZones) do
---             if x >= zone.x1 and x <= zone.x2 then
---                 zone.action()
---                 break
---             end
---         end
---     end
--- end)
-dinkyHud:canvasMouseEvents(true, true, false, false)
-updateHud()
--- Refresh every 2 seconds and immediately on Space changes or app launches/quits
-dinkyTimer = hs.timer.doEvery(2, updateHud)
-dinkySpaceWatcher = hs.spaces.watcher.new(function()
-    hs.timer.doAfter(0.15, updateHud)
-end):start()
-dinkyAppWatcher = hs.application.watcher.new(function(_, event)
-    if event == hs.application.watcher.launched or event == hs.application.watcher.terminated then
-        hs.timer.doAfter(0.2, updateHud)
-    end
-end):start()
+return obj

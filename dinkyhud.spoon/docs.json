@@ -1,0 +1,514 @@
+[
+  {
+    "Constant" : [
+
+    ],
+    "submodules" : [
+
+    ],
+    "Function" : [
+
+    ],
+    "Variable" : [
+      {
+        "desc" : "Absolute path to the `dinky` executable",
+        "stripped_doc" : [
+          "Absolute path to the `dinky` executable"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Absolute path to the `dinky` executable",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.dinkyBin",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.dinkyBin",
+        "name" : "dinkyBin"
+      },
+      {
+        "desc" : "Font used for the app icons (requires the sketchybar-app-font glyphs)",
+        "stripped_doc" : [
+          "Font used for the app icons (requires the sketchybar-app-font glyphs)"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Font used for the app icons (requires the sketchybar-app-font glyphs)",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.appFont",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.appFont",
+        "name" : "appFont"
+      },
+      {
+        "desc" : "Vertical placement: \"bottom\" (above the Dock) or \"top\" (just below the menu bar)",
+        "stripped_doc" : [
+          "Vertical placement: \"bottom\" (above the Dock) or \"top\" (just below the menu bar)"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Vertical placement: \"bottom\" (above the Dock) or \"top\" (just below the menu bar)",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.position",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.position",
+        "name" : "position"
+      },
+      {
+        "desc" : "Seconds between automatic refreshes",
+        "stripped_doc" : [
+          "Seconds between automatic refreshes"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Seconds between automatic refreshes",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.refreshInterval",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.refreshInterval",
+        "name" : "refreshInterval"
+      },
+      {
+        "desc" : "Path to the sketchybar app icon map; defaults to the `icon_map.sh` bundled with this Spoon",
+        "stripped_doc" : [
+          "Path to the sketchybar app icon map; defaults to the `icon_map.sh` bundled with this Spoon"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Path to the sketchybar app icon map; defaults to the `icon_map.sh` bundled with this Spoon",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.iconMapPath",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.iconMapPath",
+        "name" : "iconMapPath"
+      },
+      {
+        "desc" : "Short label shown for each layout (keys: `dwindle`, `master`, `scrolling`)",
+        "stripped_doc" : [
+          "Short label shown for each layout (keys: `dwindle`, `master`, `scrolling`)"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Short label shown for each layout (keys: `dwindle`, `master`, `scrolling`)",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.layoutLabels",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.layoutLabels",
+        "name" : "layoutLabels"
+      },
+      {
+        "desc" : "Badge colours keyed by dinky mode name; `default` is used for unknown modes",
+        "stripped_doc" : [
+          "Badge colours keyed by dinky mode name; `default` is used for unknown modes"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Badge colours keyed by dinky mode name; `default` is used for unknown modes",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.modeColors",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.modeColors",
+        "name" : "modeColors"
+      }
+    ],
+    "stripped_doc" : [
+
+    ],
+    "desc" : "A compact floating HUD for the dinky tiling window manager",
+    "type" : "Module",
+    "Deprecated" : [
+
+    ],
+    "Constructor" : [
+
+    ],
+    "Field" : [
+
+    ],
+    "Method" : [
+      {
+        "desc" : "Create the HUD canvas",
+        "stripped_doc" : [
+          "Create the HUD canvas",
+          "",
+          "Called automatically by `hs.loadSpoon`. Calling it again replaces any",
+          "canvas created by a previous call.",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Create the HUD canvas\n\nCalled automatically by `hs.loadSpoon`. Calling it again replaces any\ncanvas created by a previous call.\n\nReturns:\n * The dinkyhud object",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud:init()",
+        "type" : "Method",
+        "returns" : [
+          " * The dinkyhud object"
+        ],
+        "def" : "dinkyhud:init()",
+        "name" : "init"
+      },
+      {
+        "desc" : "Start the HUD",
+        "stripped_doc" : [
+          "Start the HUD",
+          "",
+          "Loads the icon map, performs an immediate refresh, starts the refresh",
+          "timer and the Spaces\/application watchers. A previous run is stopped",
+          "first, so calling this twice is safe.",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Start the HUD\n\nLoads the icon map, performs an immediate refresh, starts the refresh\ntimer and the Spaces\/application watchers. A previous run is stopped\nfirst, so calling this twice is safe.\n\nReturns:\n * The dinkyhud object",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud:start()",
+        "type" : "Method",
+        "returns" : [
+          " * The dinkyhud object"
+        ],
+        "def" : "dinkyhud:start()",
+        "name" : "start"
+      },
+      {
+        "desc" : "Stop the HUD",
+        "stripped_doc" : [
+          "Stop the HUD",
+          "",
+          "Stops the refresh timer and both watchers, and hides the canvas. The HUD",
+          "can be started again with `start()`.",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Stop the HUD\n\nStops the refresh timer and both watchers, and hides the canvas. The HUD\ncan be started again with `start()`.\n\nReturns:\n * The dinkyhud object",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud:stop()",
+        "type" : "Method",
+        "returns" : [
+          " * The dinkyhud object"
+        ],
+        "def" : "dinkyhud:stop()",
+        "name" : "stop"
+      },
+      {
+        "desc" : "Refresh the HUD immediately",
+        "stripped_doc" : [
+          "Refresh the HUD immediately",
+          "",
+          "Queries `dinky` for the current workspaces, windows and mode, then",
+          "redraws the canvas. Refreshes happen automatically while the HUD is",
+          "running; call this only when you want an on-demand redraw.",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Refresh the HUD immediately\n\nQueries `dinky` for the current workspaces, windows and mode, then\nredraws the canvas. Refreshes happen automatically while the HUD is\nrunning; call this only when you want an on-demand redraw.\n\nReturns:\n * The dinkyhud object",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud:update()",
+        "type" : "Method",
+        "returns" : [
+          " * The dinkyhud object"
+        ],
+        "def" : "dinkyhud:update()",
+        "name" : "update"
+      }
+    ],
+    "Command" : [
+
+    ],
+    "items" : [
+      {
+        "desc" : "Font used for the app icons (requires the sketchybar-app-font glyphs)",
+        "stripped_doc" : [
+          "Font used for the app icons (requires the sketchybar-app-font glyphs)"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Font used for the app icons (requires the sketchybar-app-font glyphs)",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.appFont",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.appFont",
+        "name" : "appFont"
+      },
+      {
+        "desc" : "Absolute path to the `dinky` executable",
+        "stripped_doc" : [
+          "Absolute path to the `dinky` executable"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Absolute path to the `dinky` executable",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.dinkyBin",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.dinkyBin",
+        "name" : "dinkyBin"
+      },
+      {
+        "desc" : "Path to the sketchybar app icon map; defaults to the `icon_map.sh` bundled with this Spoon",
+        "stripped_doc" : [
+          "Path to the sketchybar app icon map; defaults to the `icon_map.sh` bundled with this Spoon"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Path to the sketchybar app icon map; defaults to the `icon_map.sh` bundled with this Spoon",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.iconMapPath",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.iconMapPath",
+        "name" : "iconMapPath"
+      },
+      {
+        "desc" : "Short label shown for each layout (keys: `dwindle`, `master`, `scrolling`)",
+        "stripped_doc" : [
+          "Short label shown for each layout (keys: `dwindle`, `master`, `scrolling`)"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Short label shown for each layout (keys: `dwindle`, `master`, `scrolling`)",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.layoutLabels",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.layoutLabels",
+        "name" : "layoutLabels"
+      },
+      {
+        "desc" : "Badge colours keyed by dinky mode name; `default` is used for unknown modes",
+        "stripped_doc" : [
+          "Badge colours keyed by dinky mode name; `default` is used for unknown modes"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Badge colours keyed by dinky mode name; `default` is used for unknown modes",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.modeColors",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.modeColors",
+        "name" : "modeColors"
+      },
+      {
+        "desc" : "Vertical placement: \"bottom\" (above the Dock) or \"top\" (just below the menu bar)",
+        "stripped_doc" : [
+          "Vertical placement: \"bottom\" (above the Dock) or \"top\" (just below the menu bar)"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Vertical placement: \"bottom\" (above the Dock) or \"top\" (just below the menu bar)",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.position",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.position",
+        "name" : "position"
+      },
+      {
+        "desc" : "Seconds between automatic refreshes",
+        "stripped_doc" : [
+          "Seconds between automatic refreshes"
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Seconds between automatic refreshes",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud.refreshInterval",
+        "type" : "Variable",
+        "returns" : [
+
+        ],
+        "def" : "dinkyhud.refreshInterval",
+        "name" : "refreshInterval"
+      },
+      {
+        "desc" : "Create the HUD canvas",
+        "stripped_doc" : [
+          "Create the HUD canvas",
+          "",
+          "Called automatically by `hs.loadSpoon`. Calling it again replaces any",
+          "canvas created by a previous call.",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Create the HUD canvas\n\nCalled automatically by `hs.loadSpoon`. Calling it again replaces any\ncanvas created by a previous call.\n\nReturns:\n * The dinkyhud object",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud:init()",
+        "type" : "Method",
+        "returns" : [
+          " * The dinkyhud object"
+        ],
+        "def" : "dinkyhud:init()",
+        "name" : "init"
+      },
+      {
+        "desc" : "Start the HUD",
+        "stripped_doc" : [
+          "Start the HUD",
+          "",
+          "Loads the icon map, performs an immediate refresh, starts the refresh",
+          "timer and the Spaces\/application watchers. A previous run is stopped",
+          "first, so calling this twice is safe.",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Start the HUD\n\nLoads the icon map, performs an immediate refresh, starts the refresh\ntimer and the Spaces\/application watchers. A previous run is stopped\nfirst, so calling this twice is safe.\n\nReturns:\n * The dinkyhud object",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud:start()",
+        "type" : "Method",
+        "returns" : [
+          " * The dinkyhud object"
+        ],
+        "def" : "dinkyhud:start()",
+        "name" : "start"
+      },
+      {
+        "desc" : "Stop the HUD",
+        "stripped_doc" : [
+          "Stop the HUD",
+          "",
+          "Stops the refresh timer and both watchers, and hides the canvas. The HUD",
+          "can be started again with `start()`.",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Stop the HUD\n\nStops the refresh timer and both watchers, and hides the canvas. The HUD\ncan be started again with `start()`.\n\nReturns:\n * The dinkyhud object",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud:stop()",
+        "type" : "Method",
+        "returns" : [
+          " * The dinkyhud object"
+        ],
+        "def" : "dinkyhud:stop()",
+        "name" : "stop"
+      },
+      {
+        "desc" : "Refresh the HUD immediately",
+        "stripped_doc" : [
+          "Refresh the HUD immediately",
+          "",
+          "Queries `dinky` for the current workspaces, windows and mode, then",
+          "redraws the canvas. Refreshes happen automatically while the HUD is",
+          "running; call this only when you want an on-demand redraw.",
+          ""
+        ],
+        "parameters" : [
+
+        ],
+        "doc" : "Refresh the HUD immediately\n\nQueries `dinky` for the current workspaces, windows and mode, then\nredraws the canvas. Refreshes happen automatically while the HUD is\nrunning; call this only when you want an on-demand redraw.\n\nReturns:\n * The dinkyhud object",
+        "notes" : [
+
+        ],
+        "signature" : "dinkyhud:update()",
+        "type" : "Method",
+        "returns" : [
+          " * The dinkyhud object"
+        ],
+        "def" : "dinkyhud:update()",
+        "name" : "update"
+      }
+    ],
+    "doc" : "A compact floating HUD for the dinky tiling window manager\n\nThe HUD shows every workspace that has windows (plus the focused one),\nrenders a sketchybar-app-font icon for each app running in it, and appends\na badge for the current layout\/mode. It refreshes on a timer and\nimmediately when Spaces change or applications launch\/quit.\n\nRequirements:\n * `dinky` installed (default path `\/opt\/homebrew\/bin\/dinky`, override with `dinkyhud.dinkyBin`)\n * `sketchybar-app-font` installed for the app icons\n\nUsage:\n\n    hs.loadSpoon(\"dinkyhud\")\n    spoon.dinkyhud.position = \"top\" -- optional, before start()\n    spoon.dinkyhud:start()",
+    "name" : "dinkyhud"
+  }
+]
