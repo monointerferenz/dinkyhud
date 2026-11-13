@@ -1,7 +1,7 @@
 # DinkiHUD
 A Hammerspoon spoon HUD for the [dinky window manager from ](https://github.com/mikker/Dinky)
 
-![dinkihud](https://raw.githubusercontent.com/monointerferenz/dinkyhud/refs/heads/doc/doc/dinkyhub.png)
+![dinkyhud](https://raw.githubusercontent.com/monointerferenz/dinkyhud/refs/heads/doc/doc/dinkyhub.png)
 
 1. Install [`sketchybar-app-font`](https://github.com/kvndrsslr/sketchybar-app-font).
 2. ⁣Add the [sketchybar-app-font mapping to the hammerspoon directory](https://github.com/kvndrsslr/sketchybar-app-font)
