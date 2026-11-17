@@ -23,7 +23,8 @@ cp -R dinkyhud.spoon ~/.hammerspoon/Spoons/
 # or, while developing:
 ln -s "$(pwd)/dinkyhud.spoon" ~/.hammerspoon/Spoons/
 ```
-
+> [!TIP]
+> You might want to replace the `icon_map.sh` since I'm not always keeping the version in the repository up to date.
 ## Usage
 
 ```lua
